@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NodeForge — Node.js & Express Learning Playground</title>
+  <meta name="description" content="NodeForge is an interactive educational developer playground for mastering Node.js runtime, CommonJS modules, core fs/path/process modules, raw HTTP servers, and Express.js lifecycle.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- App Container -->
+  <div class="app-layout">
+    
+    <!-- Top Navigation Header -->
+    <header class="navbar" id="mainNavbar">
+      <div class="nav-container">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">NodeForge</span>
+            <span class="brand-subtitle">Node.js & Express Playground</span>
+          </div>
+        </div>
+
+        <nav class="nav-links" id="navLinks" role="tablist">
+          <button class="nav-btn active" data-tab="overview" role="tab" id="tab-overview">Overview</button>
+          <button class="nav-btn" data-tab="runtime" role="tab" id="tab-runtime">Node Runtime</button>
+          <button class="nav-btn" data-tab="core-modules" role="tab" id="tab-core-modules">Core Modules</button>
+          <button class="nav-btn" data-tab="raw-http" data-tooltip="Raw http server" role="tab" id="tab-raw-http">Raw HTTP Server</button>
+          <button class="nav-btn" data-tab="express" role="tab" id="tab-express">Express.js</button>
+          <button class="nav-btn" data-tab="lifecycle" role="tab" id="tab-lifecycle">Request Lifecycle</button>
+          <button class="nav-btn" data-tab="viva" role="tab" id="tab-viva">Viva Questions</button>
+        </nav>
+
+        <div class="nav-status">
+          <div class="status-indicator" id="topStatusIndicator">
+            <span class="pulse-dot"></span>
+            <span class="status-text" id="topStatusText">Checking Server...</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="mainContent">
+
+      <!-- ========================================== -->
+      <!-- SECTION 1: OVERVIEW DASHBOARD              -->
+      <!-- ========================================== -->
+      <section class="tab-pane active" id="pane-overview" role="tabpanel">
+        <div class="hero-banner">
+          <div class="hero-content">
+            <span class="hero-badge">Week 15–16 Mastery</span>
+            <h1 class="hero-title">Understand the Backend. Build It Yourself.</h1>
+            <p class="hero-subtitle">
+              NodeForge demonstrates how Node.js handles server-side JavaScript through the V8 engine, leverages built-in system modules, and how Express simplifies building robust, production-ready web servers through organized routing and middleware.
+            </p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" onclick="switchTab('raw-http')">Explore Raw HTTP Server</button>
+              <button class="btn btn-secondary" onclick="switchTab('express')">Explore Express Engine</button>
+              <button class="btn btn-outline" onclick="switchTab('lifecycle')">Trace Request Lifecycle</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Server Status Panel -->
+        <div class="card status-panel-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-tag">Real-Time Observability</span>
+              <h2 class="card-title">Backend Status Panel</h2>
+            </div>
+            <button class="btn btn-sm btn-outline" id="btnRefreshHealth" onclick="checkBackendHealth()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+              Check API Status
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="status-grid">
+              <div class="status-item">
+                <span class="status-label">Express API Status</span>
+                <div class="status-value-box" id="healthStatusBox">
+                  <span class="status-pill status-loading" id="apiStatusPill">Connecting...</span>
+                </div>
+              </div>
+              <div class="status-item">
+                <span class="status-label">Configured Port</span>
+                <div class="status-value-box">
+                  <span class="code-badge" id="portBadge">PORT: 3000</span>
+                </div>
+              </div>
+              <div class="status-item">
+                <span class="status-label">Total API Requests Handled</span>
+                <div class="status-value-box">
+                  <span class="metric-number" id="requestCountMetric">0</span>
+                </div>
+              </div>
+              <div class="status-item">
+                <span class="status-label">Server Uptime</span>
+                <div class="status-value-box">
+                  <span class="metric-text" id="uptimeMetric">0s</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="console-preview" style="margin-top: 1.25rem;">
+              <div class="console-header">
+                <span class="console-title">Live Response Inspector: GET /api/health</span>
+                <span class="console-time" id="healthLastChecked">Awaiting check</span>
+              </div>
+              <pre class="console-body" id="healthResponseConsole"><code>Click "Check API Status" to fetch real server status...</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Syllabus Concept Cards -->
+        <div class="section-heading-group">
+          <h2>Core Concepts Covered</h2>
+          <p>Click any card to jump directly into the practical interactive demonstration.</p>
+        </div>
+
+        <div class="grid grid-3">
+          <div class="card concept-card" onclick="switchTab('runtime')">
+            <div class="concept-icon runtime-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <h3>Node.js Runtime</h3>
+            <p>Runs JavaScript outside the browser using Google Chrome's V8 engine and libuv for non-blocking asynchronous I/O.</p>
+            <span class="card-link-text">Explore Runtime &rarr;</span>
+          </div>
+
+          <div class="card concept-card" onclick="switchTab('runtime')">
+            <div class="concept-icon modules-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </div>
+            <h3>CommonJS Modules</h3>
+            <p>Understand how <code>require()</code> synchronously imports code and <code>module.exports</code> encapsulates reusable logic.</p>
+            <span class="card-link-text">Explore CommonJS &rarr;</span>
+          </div>
+
+          <div class="card concept-card" onclick="switchTab('core-modules')">
+            <div class="concept-icon core-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <h3>Core Modules: fs, path, process</h3>
+            <p>Direct file manipulation with <code>fs.promises</code>, cross-platform path normalization, and runtime environment inspection.</p>
+            <span class="card-link-text">Explore Core Modules &rarr;</span>
+          </div>
+
+          <div class="card concept-card" onclick="switchTab('raw-http')">
+            <div class="concept-icon http-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            </div>
+            <h3>Raw HTTP Server</h3>
+            <p>Build a real server from scratch with Node's native <code>http.createServer()</code> without any external dependencies.</p>
+            <span class="card-link-text">Explore Raw HTTP &rarr;</span>
+          </div>
+
+          <div class="card concept-card" onclick="switchTab('express')">
+            <div class="concept-icon express-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <h3>Express.js Routing</h3>
+            <p>High-level declarative route management, parameter extraction, and organized controller architectures.</p>
+            <span class="card-link-text">Explore Express &rarr;</span>
+          </div>
+
+          <div class="card concept-card" onclick="switchTab('lifecycle')">
+            <div class="concept-icon middleware-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <h3>Middleware & Lifecycle</h3>
+            <p>Visualize how requests traverse loggers, JSON parsers, timers, route handlers, and error catchers with <code>next()</code>.</p>
+            <span class="card-link-text">Explore Lifecycle &rarr;</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- SECTION 2: NODE.JS RUNTIME & COMMONJS      -->
+      <!-- ========================================== -->
+      <section class="tab-pane" id="pane-runtime" role="tabpanel">
+        <div class="section-header">
+          <span class="section-tag">Week 15 Foundation</span>
+          <h2>Node.js Runtime & CommonJS Module System</h2>
+          <p>Learn how Node.js allows JavaScript to break out of the browser and execute directly on the operating system.</p>
+        </div>
+
+        <!-- Concept Theory vs Reality -->
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 class="card-subtitle">What is the Node.js Runtime?</h3>
+            <p>Node.js is an open-source, cross-platform JavaScript runtime environment that executes JavaScript code outside a web browser.</p>
+            <ul class="feature-list">
+              <li><strong>V8 Engine:</strong> Compiles JavaScript directly into machine code for high performance.</li>
+              <li><strong>libuv Library:</strong> Provides the event loop and thread pool for non-blocking asynchronous I/O.</li>
+              <li><strong>Single-Threaded Event Loop:</strong> Handles thousands of concurrent network connections without allocating heavy operating system threads per request.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3 class="card-subtitle">Browser JS vs Server-Side JS</h3>
+            <div class="comparison-table-wrapper">
+              <table class="comparison-table">
+                <thead>
+                  <tr>
+                    <th>Feature</th>
+                    <th>Browser JavaScript</th>
+                    <th>Node.js (Server-Side)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Global Object</strong></td>
+                    <td><code>window</code>, <code>document</code></td>
+                    <td><code>global</code>, <code>process</code></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Filesystem Access</strong></td>
+                    <td>Restricted (Sandbox)</td>
+                    <td>Full access via <code>fs</code></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Operating System</strong></td>
+                    <td>Inaccessible</td>
+                    <td>Direct access via <code>os</code>, <code>process</code></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Primary Role</strong></td>
+                    <td>UI, events, DOM rendering</td>
+                    <td>APIs, databases, business logic</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Runtime Stats from process -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-tag">Live Process Inspector</span>
+              <h3 class="card-title">Real Node.js Environment Metrics</h3>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="fetchRuntimeMetrics()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+              Refresh Runtime Data
+            </button>
+          </div>
+          <div class="card-body">
+            <p class="card-desc">The metrics below are queried live from the Express backend endpoint <code>GET /api/runtime</code> using the built-in <code>process</code> object.</p>
+            <div class="grid grid-4" id="runtimeMetricsGrid">
+              <div class="metric-card">
+                <span class="metric-card-label">Node.js Version</span>
+                <span class="metric-card-value" id="rtNodeVersion">Loading...</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-card-label">Platform / Arch</span>
+                <span class="metric-card-value" id="rtPlatform">Loading...</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-card-label">Process PID</span>
+                <span class="metric-card-value" id="rtPid">Loading...</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-card-label">Environment</span>
+                <span class="metric-card-value" id="rtEnv">Loading...</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-card-label">Heap Memory Used</span>
+                <span class="metric-card-value" id="rtMemory">Loading...</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-card-label">V8 Engine Version</span>
+                <span class="metric-card-value" id="rtV8">Loading...</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-card-label">libuv Version</span>
+                <span class="metric-card-value" id="rtUv">Loading...</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-card-label">Server Uptime</span>
+                <span class="metric-card-value" id="rtUptime">Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CommonJS Deep Dive & Practical Demo -->
+        <div class="section-heading-group" style="margin-top: 2.5rem;">
+          <h2>CommonJS Modules: require() and module.exports</h2>
+          <p>CommonJS wraps every file into a module function: <code>(function(exports, require, module, __filename, __dirname) { ... })</code>.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <!-- Demo 1: Greeting Module -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Module 1: <code>utils/greeting.js</code></h3>
+              <span class="badge badge-indigo">CommonJS</span>
+            </div>
+            <div class="code-box">
+              <div class="code-box-header">
+                <span>utils/greeting.js</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre><code>// Exporting functions using module.exports
+function createGreeting(name, role) {
+  return `Welcome to NodeForge, ${name}! Excited to explore Node.js as a ${role}.`;
+}
+
+module.exports = { createGreeting };</code></pre>
+            </div>
+
+            <div class="interactive-form" style="margin-top: 1rem;">
+              <h4>Test Greeting Module via API:</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="greetName">Name:</label>
+                  <input type="text" id="greetName" class="input-field" value="Alex Rivera">
+                </div>
+                <div class="form-group">
+                  <label for="greetRole">Role:</label>
+                  <input type="text" id="greetRole" class="input-field" value="3rd Sem CS Student">
+                </div>
+              </div>
+              <button class="btn btn-sm btn-primary" onclick="testGreetingModule()">Invoke utils/greeting via API</button>
+              <div class="result-box" id="greetingResultBox" style="display:none; margin-top: 0.75rem;"></div>
+            </div>
+          </div>
+
+          <!-- Demo 2: Math Module -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Module 2: <code>utils/math.js</code></h3>
+              <span class="badge badge-indigo">CommonJS</span>
+            </div>
+            <div class="code-box">
+              <div class="code-box-header">
+                <span>utils/math.js</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre><code>// Mathematical and statistical utilities
+function add(a, b) { return Number(a) + Number(b); }
+function divide(a, b) {
+  if (Number(b) === 0) throw new Error('Division by zero');
+  return Number(a) / Number(b);
+}
+module.exports = { add, divide, ... };</code></pre>
+            </div>
+
+            <div class="interactive-form" style="margin-top: 1rem;">
+              <h4>Test Math Module via API:</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="mathOp">Operation:</label>
+                  <select id="mathOp" class="input-field" onchange="toggleMathInputs()">
+                    <option value="add">Add (a + b)</option>
+                    <option value="subtract">Subtract (a - b)</option>
+                    <option value="multiply">Multiply (a × b)</option>
+                    <option value="divide">Divide (a ÷ b)</option>
+                    <option value="factorial">Factorial (n!)</option>
+                    <option value="power">Power (a ^ b)</option>
+                    <option value="stats">Statistical Summary</option>
+                  </select>
+                </div>
+                <div class="form-group" id="groupMathA">
+                  <label for="mathA">Value A:</label>
+                  <input type="number" id="mathA" class="input-field" value="24">
+                </div>
+                <div class="form-group" id="groupMathB">
+                  <label for="mathB">Value B:</label>
+                  <input type="number" id="mathB" class="input-field" value="6">
+                </div>
+              </div>
+              <button class="btn btn-sm btn-primary" onclick="testMathModule()">Compute via POST /api/demo/math</button>
+              <div class="result-box" id="mathResultBox" style="display:none; margin-top: 0.75rem;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- SECTION 3: CORE MODULES (fs, path, process)-->
+      <!-- ========================================== -->
+      <section class="tab-pane" id="pane-core-modules" role="tabpanel">
+        <div class="section-header">
+          <span class="section-tag">Built-in Power</span>
+          <h2>Node.js Core Modules: fs, path, and process</h2>
+          <p>Node.js ships with powerful built-in modules that require no npm installation. Explore how they enable real backend capabilities.</p>
+        </div>
+
+        <!-- Sub-Navigation for Core Modules -->
+        <div class="sub-nav">
+          <button class="sub-nav-btn active" onclick="switchCoreSubTab('fs')">1. File System (fs)</button>
+          <button class="sub-nav-btn" onclick="switchCoreSubTab('path')">2. Path Module (path)</button>
+          <button class="sub-nav-btn" onclick="switchCoreSubTab('process')">3. Process Object (process)</button>
+        </div>
+
+        <!-- SUB-TAB A: FILE SYSTEM (fs) -->
+        <div class="core-sub-pane active" id="core-fs">
+          <div class="grid grid-2">
+            <!-- Theory & Code -->
+            <div class="card">
+              <h3>Working with Files: <code>fs.promises</code></h3>
+              <p>Node's <code>fs</code> module provides asynchronous, non-blocking file operations. Always prefer <code>fs.promises</code> with <code>async/await</code> in modern backend applications.</p>
+              
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span>Asynchronous File I/O Pattern</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>const fs = require('fs').promises;
+const path = require('path');
+
+const filePath = path.join(__dirname, '..', 'data', 'notes.json');
+
+// Reading data asynchronously
+const raw = await fs.readFile(filePath, 'utf8');
+const notes = JSON.parse(raw);
+
+// Writing data safely
+await fs.writeFile(filePath, JSON.stringify(notes, null, 2));</code></pre>
+              </div>
+
+              <div class="callout callout-info" style="margin-top: 1rem;">
+                <strong>Safe Storage Guarantee:</strong> All notes are stored inside <code>data/notes.json</code> in this project. No arbitrary files or unsafe user paths are allowed.
+              </div>
+            </div>
+
+            <!-- Interactive Notes App -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Live Notes Manager (Stored in <code>data/notes.json</code>)</h3>
+                <button class="btn btn-sm btn-outline" onclick="loadNotes()">Refresh Notes</button>
+              </div>
+
+              <!-- Note Creation Form -->
+              <form class="notes-form" id="createNoteForm" onsubmit="handleCreateNote(event)">
+                <div class="form-group">
+                  <label for="noteTitle">Note Title:</label>
+                  <input type="text" id="noteTitle" class="input-field" placeholder="e.g. Asynchronous I/O Benefits" required>
+                </div>
+                <div class="form-row">
+                  <div class="form-group" style="flex: 1;">
+                    <label for="noteCategory">Category:</label>
+                    <select id="noteCategory" class="input-field">
+                      <option value="Architecture">Architecture</option>
+                      <option value="Modules">Modules</option>
+                      <option value="Express">Express</option>
+                      <option value="General">General</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="noteContent">Note Content:</label>
+                  <textarea id="noteContent" class="input-field" rows="3" placeholder="Write your backend concept note here..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" id="btnAddNote">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add Note to File System
+                </button>
+              </form>
+
+              <!-- Notes List Container -->
+              <div class="notes-list-header" style="margin-top: 1.5rem;">
+                <h4>Saved Notes in <code>data/notes.json</code> (<span id="notesCount">0</span>)</h4>
+              </div>
+              <div class="notes-container" id="notesListContainer">
+                <div class="loading-spinner-box">Loading notes from backend...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-TAB B: PATH MODULE -->
+        <div class="core-sub-pane" id="core-path" style="display:none;">
+          <div class="grid grid-2">
+            <div class="card">
+              <h3>The <code>path</code> Module: Cross-Platform Path Handling</h3>
+              <p>Operating systems handle file paths differently: Windows uses backslashes (<code>\</code>), while Linux and macOS use forward slashes (<code>/</code>). The <code>path</code> module normalizes paths automatically.</p>
+              
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span>path Methods Reference</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>const path = require('path');
+
+path.join('users', 'docs', 'file.txt'); // Cross-platform safe join
+path.resolve('file.txt');               // Resolves to absolute path
+path.basename('/data/notes.json');      // 'notes.json'
+path.extname('/data/notes.json');       // '.json'
+path.dirname('/data/notes.json');       // '/data'</code></pre>
+              </div>
+
+              <div class="callout callout-warning" style="margin-top: 1rem;">
+                <strong>Never hardcode slashes:</strong> Using <code>'folder/' + file</code> will break on Windows. Always use <code>path.join(__dirname, 'folder', file)</code>!
+              </div>
+            </div>
+
+            <!-- Interactive Path Sandbox -->
+            <div class="card">
+              <h3>Interactive Path Manipulation Sandbox</h3>
+              <p>Enter path segments below to see how Node's <code>path</code> functions compute results on the current host system:</p>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="pathSegment1">Segment 1:</label>
+                  <input type="text" id="pathSegment1" class="input-field" value="projects">
+                </div>
+                <div class="form-group">
+                  <label for="pathSegment2">Segment 2:</label>
+                  <input type="text" id="pathSegment2" class="input-field" value="nodeforge">
+                </div>
+                <div class="form-group">
+                  <label for="pathSegment3">Segment 3:</label>
+                  <input type="text" id="pathSegment3" class="input-field" value="server.js">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="sampleFileName">Sample Filename / Relative Target:</label>
+                <input type="text" id="sampleFileName" class="input-field" value="controllers/notesController.js">
+              </div>
+
+              <button class="btn btn-primary" onclick="testPathManipulation()">Inspect via POST /api/demo/path</button>
+
+              <div class="console-preview" style="margin-top: 1.25rem;">
+                <div class="console-header">
+                  <span class="console-title">Live path Evaluation Output</span>
+                </div>
+                <pre class="console-body" id="pathOutputConsole"><code>Click "Inspect" to see live path.join, resolve, basename, extname calculations...</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-TAB C: PROCESS OBJECT -->
+        <div class="core-sub-pane" id="core-process" style="display:none;">
+          <div class="grid grid-2">
+            <div class="card">
+              <h3>The <code>process</code> Global Object</h3>
+              <p>The <code>process</code> object provides information about, and control over, the current Node.js process. It is globally available without <code>require()</code>.</p>
+              
+              <ul class="feature-list">
+                <li><code>process.version</code>: Node.js runtime version.</li>
+                <li><code>process.platform</code>: Host OS (<code>win32</code>, <code>linux</code>, <code>darwin</code>).</li>
+                <li><code>process.arch</code>: Processor architecture (<code>x64</code>, <code>arm64</code>).</li>
+                <li><code>process.cwd()</code>: Current working directory of the process.</li>
+                <li><code>process.env</code>: Access to environment variables.</li>
+                <li><code>process.uptime()</code>: Seconds the current process has been running.</li>
+                <li><code>process.exit(code)</code>: Terminates the process with an exit status.</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Environment Variables & <code>.env</code></h3>
+              <p>Environment variables allow configuration to be separated from code (The Twelve-Factor App methodology).</p>
+              
+              <div class="code-box">
+                <div class="code-box-header">
+                  <span>Using dotenv in server.js</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>// 1. Install: npm install dotenv
+// 2. Load at the very top of server.js
+require('dotenv').config();
+
+// 3. Access securely
+const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';</code></pre>
+              </div>
+
+              <div class="callout callout-info" style="margin-top: 1rem;">
+                <strong>Security Best Practice:</strong> Never commit <code>.env</code> files to git. Always add <code>.env</code> to <code>.gitignore</code> and commit a safe <code>.env.example</code> template instead!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- SECTION 4: RAW HTTP SERVER                 -->
+      <!-- ========================================== -->
+      <section class="tab-pane" id="pane-raw-http" role="tabpanel">
+        <div class="section-header">
+          <span class="section-tag">Pure Node.js</span>
+          <h2>Building a Server with the Native <code>http</code> Module</h2>
+          <p>Before Express existed, Node developers built web servers using the built-in <code>http</code> module. Explore how it works at the lowest layer.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <!-- Theory & Explanation -->
+          <div class="card">
+            <h3>How <code>http.createServer()</code> Works</h3>
+            <p>The native <code>http</code> module uses an event-driven HTTP parser that invokes a callback function on every incoming request.</p>
+            
+            <div class="code-box">
+              <div class="code-box-header">
+                <span>raw-server.js snippet</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre><code>const http = require('http');
+
+const server = http.createServer((req, res) => {
+  const { method, url } = req;
+  
+  if (method === 'GET' && url === '/api/hello') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ message: 'Hello from Raw HTTP!' }));
+    return;
+  }
+  
+  // Manual 404 handling required
+  res.writeHead(404, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ error: 'Not Found' }));
+});
+
+server.listen(3001);</code></pre>
+            </div>
+
+            <div class="feature-list" style="margin-top: 1rem;">
+              <li><strong><code>req</code> (IncomingMessage):</strong> Readable stream containing HTTP method, requested URL, headers, and body stream.</li>
+              <li><strong><code>res</code> (ServerResponse):</strong> Writable stream used to send status codes, response headers, and write the body payload.</li>
+              <li><strong><code>res.writeHead(status, headers)</code>:</strong> Sends HTTP status code and header block to the client.</li>
+              <li><strong><code>res.end(data)</code>:</strong> Signals to the server that all response headers and body have been sent.</li>
+            </div>
+          </div>
+
+          <!-- Live Interactive Raw Server Controller -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-tag">Port 3001 Controller</span>
+                <h3>Live Raw HTTP Server Console</h3>
+              </div>
+              <span class="status-pill status-loading" id="rawServerStatusPill">Probing Port 3001...</span>
+            </div>
+
+            <p class="card-desc">
+              Test endpoints served by <code>raw-server.js</code> on port <strong>3001</strong>. If the server is not running, run <code>npm run raw</code> in your terminal.
+            </p>
+
+            <div class="btn-group-wrap">
+              <button class="btn btn-sm btn-primary" onclick="testRawEndpoint('/')">GET / (HTML Welcome)</button>
+              <button class="btn btn-sm btn-secondary" onclick="testRawEndpoint('/api/hello')">GET /api/hello</button>
+              <button class="btn btn-sm btn-outline" onclick="testRawEndpoint('/api/time')">GET /api/time</button>
+              <button class="btn btn-sm btn-outline" onclick="testRawEndpoint('/api/status')">GET /api/status</button>
+              <button class="btn btn-sm btn-outline" onclick="testRawEndpoint('/api/unknown-demo')">GET /unknown (404)</button>
+            </div>
+
+            <div class="console-preview" style="margin-top: 1.25rem;">
+              <div class="console-header">
+                <span class="console-title" id="rawConsoleTitle">Raw HTTP Response Viewer</span>
+                <span class="console-time" id="rawConsoleStatus">Ready</span>
+              </div>
+              <pre class="console-body" id="rawConsoleBody"><code>Select an endpoint button above to query the raw HTTP server...</code></pre>
+            </div>
+
+            <div class="terminal-instructions" style="margin-top: 1rem;">
+              <h4>Terminal Command to start Raw Server:</h4>
+              <div class="code-box">
+                <pre><code>npm run raw</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- SECTION 5: EXPRESS.JS APPLICATION          -->
+      <!-- ========================================== -->
+      <section class="tab-pane" id="pane-express" role="tabpanel">
+        <div class="section-header">
+          <span class="section-tag">Modern Web Framework</span>
+          <h2>Express.js: Routing, Controllers & Clean Structure</h2>
+          <p>Express is a fast, unopinionated, minimalist web framework for Node.js. It simplifies routing, middleware chaining, and HTTP request handling.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <!-- Raw HTTP vs Express Comparison -->
+          <div class="card">
+            <h3>Why Express over Raw HTTP?</h3>
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Capability</th>
+                  <th>Raw HTTP Module</th>
+                  <th>Express.js</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Routing</strong></td>
+                  <td>Manual <code>if/else</code> on <code>req.url</code></td>
+                  <td>Declarative <code>app.get()</code>, <code>app.post()</code></td>
+                </tr>
+                <tr>
+                  <td><strong>Middleware</strong></td>
+                  <td>Manual function wrapping</td>
+                  <td>Native <code>app.use()</code> pipeline</td>
+                </tr>
+                <tr>
+                  <td><strong>URL Params</strong></td>
+                  <td>Manual regex parsing</td>
+                  <td>Automated <code>req.params</code> (e.g. <code>:id</code>)</td>
+                </tr>
+                <tr>
+                  <td><strong>JSON Parsing</strong></td>
+                  <td>Manual stream chunk buffering</td>
+                  <td>Built-in <code>express.json()</code></td>
+                </tr>
+                <tr>
+                  <td><strong>Error Handling</strong></td>
+                  <td>Scattered <code>try/catch</code></td>
+                  <td>Centralized 4-arg error middleware</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Express Route Tester -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Interactive Express Route Tester</h3>
+              <span class="badge badge-emerald">Port 3000 Active</span>
+            </div>
+            <p>Dispatch real requests to the Express endpoints defined in <code>routes/apiRoutes.js</code>:</p>
+
+            <div class="btn-group-wrap">
+              <button class="btn btn-sm btn-primary" onclick="testExpressRoute('/api/health')">GET /api/health</button>
+              <button class="btn btn-sm btn-secondary" onclick="testExpressRoute('/api/runtime')">GET /api/runtime</button>
+              <button class="btn btn-sm btn-outline" onclick="testExpressRoute('/api/demo/hello?name=Student&role=VivaPrep')">GET /api/demo/hello</button>
+              <button class="btn btn-sm btn-outline" onclick="testExpressRoute('/api/demo/time')">GET /api/demo/time</button>
+              <button class="btn btn-sm btn-danger" onclick="testExpressRoute('/api/demo/error?status=500&msg=Simulated+internal+server+error')">Trigger 500 Error</button>
+              <button class="btn btn-sm btn-outline" onclick="testExpressRoute('/api/requests')">GET /api/requests</button>
+              <button class="btn btn-sm btn-outline" onclick="testExpressRoute('/api/logs')">GET /api/logs</button>
+            </div>
+
+            <div class="console-preview" style="margin-top: 1.25rem;">
+              <div class="console-header">
+                <span class="console-title" id="expressConsoleTitle">Express Response Console</span>
+                <span class="console-time" id="expressConsoleStatus">Ready</span>
+              </div>
+              <pre class="console-body" id="expressConsoleBody"><code>Click an Express route button above to observe real HTTP response...</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent In-Memory Request Logs Table -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-tag">In-Memory Ring Buffer</span>
+              <h3 class="card-title">Recent Server Request Logs (Last 50)</h3>
+            </div>
+            <button class="btn btn-sm btn-outline" onclick="refreshServerLogs()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+              Refresh Logs
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="logsTable">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Method</th>
+                  <th>URL Path</th>
+                  <th>Status</th>
+                  <th>Duration</th>
+                  <th>Client IP</th>
+                </tr>
+              </thead>
+              <tbody id="logsTableBody">
+                <tr><td colspan="6" style="text-align:center; padding: 20px;">Fetching server logs...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- SECTION 6: REQUEST-RESPONSE LIFECYCLE      -->
+      <!-- ========================================== -->
+      <section class="tab-pane" id="pane-lifecycle" role="tabpanel">
+        <div class="section-header">
+          <span class="section-tag">Visual Execution Engine</span>
+          <h2>The Express Request–Response Lifecycle</h2>
+          <p>Every HTTP request passes sequentially through registered middleware before reaching the route controller, returning a response back to the client.</p>
+        </div>
+
+        <!-- Interactive Diagram -->
+        <div class="card lifecycle-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-tag">Pipeline Simulation</span>
+              <h3 class="card-title">Live Lifecycle Pipeline Visualizer</h3>
+            </div>
+            <div class="demo-select-wrap">
+              <select id="lifecycleRequestSelector" class="input-field" style="max-width: 280px;">
+                <option value="hello">GET /api/demo/hello (Success Flow)</option>
+                <option value="math">POST /api/demo/math (JSON Body Flow)</option>
+                <option value="error">GET /api/demo/error (Error Handler Flow)</option>
+                <option value="notfound">GET /api/unknown-path (404 Fallthrough)</option>
+              </select>
+              <button class="btn btn-primary" id="btnRunLifecycle" onclick="runLifecycleSimulation()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Send Request & Trace Lifecycle
+              </button>
+            </div>
+          </div>
+
+          <!-- Flow Diagram Nodes -->
+          <div class="lifecycle-flow-container">
+            <div class="flow-title">Standard Execution Path:</div>
+            <div class="pipeline-track" id="standardPipelineTrack">
+              <div class="pipe-node" id="node-client-req">
+                <span class="node-badge">1</span>
+                <span class="node-title">Client Request</span>
+                <span class="node-desc">Incoming TCP socket</span>
+              </div>
+              <div class="pipe-arrow">&rarr;</div>
+              <div class="pipe-node" id="node-timing">
+                <span class="node-badge">2</span>
+                <span class="node-title">API Timing</span>
+                <span class="node-desc">req._startTime</span>
+              </div>
+              <div class="pipe-arrow">&rarr;</div>
+              <div class="pipe-node" id="node-cors">
+                <span class="node-badge">3</span>
+                <span class="node-title">CORS Headers</span>
+                <span class="node-desc">Access-Control-*</span>
+              </div>
+              <div class="pipe-arrow">&rarr;</div>
+              <div class="pipe-node" id="node-logger">
+                <span class="node-badge">4</span>
+                <span class="node-title">Request Logger</span>
+                <span class="node-desc">console.log & buffer</span>
+              </div>
+              <div class="pipe-arrow">&rarr;</div>
+              <div class="pipe-node" id="node-counter">
+                <span class="node-badge">5</span>
+                <span class="node-title">Request Counter</span>
+                <span class="node-desc">totalRequests++</span>
+              </div>
+              <div class="pipe-arrow">&rarr;</div>
+              <div class="pipe-node" id="node-json">
+                <span class="node-badge">6</span>
+                <span class="node-title">express.json()</span>
+                <span class="node-desc">Parses req.body</span>
+              </div>
+              <div class="pipe-arrow">&rarr;</div>
+              <div class="pipe-node" id="node-route">
+                <span class="node-badge">7</span>
+                <span class="node-title">Route Handler</span>
+                <span class="node-desc">Controller logic</span>
+              </div>
+              <div class="pipe-arrow">&rarr;</div>
+              <div class="pipe-node" id="node-client-res">
+                <span class="node-badge">8</span>
+                <span class="node-title">Client Response</span>
+                <span class="node-desc">res.json() & finish</span>
+              </div>
+            </div>
+
+            <!-- Error Flow Nodes -->
+            <div class="flow-title" style="margin-top: 1.5rem; color: #dc2626;">Error Branch Execution Path (When next(err) is invoked):</div>
+            <div class="pipeline-track error-track" id="errorPipelineTrack">
+              <div class="pipe-node node-error" id="node-error-origin">
+                <span class="node-badge">!</span>
+                <span class="node-title">Exception / next(err)</span>
+                <span class="node-desc">Thrown or forwarded</span>
+              </div>
+              <div class="pipe-arrow error-arrow">&rarr;</div>
+              <div class="pipe-node node-error" id="node-error-skip">
+                <span class="node-badge">!</span>
+                <span class="node-title">Skip Normal Middlewares</span>
+                <span class="node-desc">Bypasses remaining handlers</span>
+              </div>
+              <div class="pipe-arrow error-arrow">&rarr;</div>
+              <div class="pipe-node node-error" id="node-error-handler">
+                <span class="node-badge">!</span>
+                <span class="node-title">Global Error Handler</span>
+                <span class="node-desc">(err, req, res, next)</span>
+              </div>
+              <div class="pipe-arrow error-arrow">&rarr;</div>
+              <div class="pipe-node node-error" id="node-error-response">
+                <span class="node-badge">!</span>
+                <span class="node-title">JSON Error Response</span>
+                <span class="node-desc">res.status(500).json(...)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trace Execution Results -->
+          <div class="lifecycle-results-grid" style="margin-top: 1.5rem;">
+            <div class="card">
+              <h4>Real Request Details:</h4>
+              <ul class="spec-list">
+                <li><strong>Method:</strong> <span id="lcMethod">-</span></li>
+                <li><strong>Endpoint:</strong> <span id="lcEndpoint">-</span></li>
+                <li><strong>HTTP Status Code:</strong> <span id="lcStatus">-</span></li>
+                <li><strong>Response Duration:</strong> <span id="lcDuration">-</span></li>
+                <li><strong>Server Header (X-Response-Time):</strong> <span id="lcHeaderTiming">-</span></li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>Response Body Payload:</h4>
+              <pre class="console-body" id="lcResponseBody" style="max-height: 160px;"><code>Run a lifecycle simulation above...</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Core Lifecycle Concept Breakdown -->
+        <div class="grid grid-3" style="margin-top: 1.5rem;">
+          <div class="card">
+            <h4>1. <code>req</code> (Request Object)</h4>
+            <p>Represents the HTTP request and has properties for the request query string (<code>req.query</code>), parameters (<code>req.params</code>), body (<code>req.body</code>), and HTTP headers (<code>req.headers</code>).</p>
+          </div>
+          <div class="card">
+            <h4>2. <code>res</code> (Response Object)</h4>
+            <p>Represents the HTTP response that an Express app sends when it gets an HTTP request. Methods include <code>res.status()</code>, <code>res.json()</code>, <code>res.send()</code>, and <code>res.setHeader()</code>.</p>
+          </div>
+          <div class="card">
+            <h4>3. <code>next()</code> and <code>next(err)</code></h4>
+            <p>Calling <code>next()</code> passes control to the next middleware function in the stack. Calling <code>next(error)</code> with an argument skips all remaining standard middleware and jumps straight to the 4-argument error handler.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- SECTION 7: VIVA QUESTIONS                  -->
+      <!-- ========================================== -->
+      <section class="tab-pane" id="pane-viva" role="tabpanel">
+        <div class="section-header">
+          <span class="section-tag">Semester Viva Prep</span>
+          <h2>Top Viva Examination Questions & Answers</h2>
+          <p>Curated, beginner-friendly oral exam questions and accurate answers covering Node.js, Express, modules, and architecture.</p>
+        </div>
+
+        <!-- Viva Search & Filter Controls -->
+        <div class="viva-controls-card card">
+          <div class="viva-controls-row">
+            <div class="search-input-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="vivaSearchInput" class="input-field" placeholder="Search viva questions (e.g. middleware, CommonJS, event loop, next)..." oninput="filterVivaQuestions()">
+            </div>
+            <div class="viva-action-btns">
+              <button class="btn btn-sm btn-outline" onclick="expandAllViva()">Expand All</button>
+              <button class="btn btn-sm btn-outline" onclick="collapseAllViva()">Collapse All</button>
+            </div>
+          </div>
+          <div class="viva-tags" id="vivaCategoryTags">
+            <button class="tag-chip active" onclick="filterVivaByCategory('all')">All Questions (20)</button>
+            <button class="tag-chip" onclick="filterVivaByCategory('Runtime')">Runtime & Engine</button>
+            <button class="tag-chip" onclick="filterVivaByCategory('Modules')">CommonJS & Modules</button>
+            <button class="tag-chip" onclick="filterVivaByCategory('Core')">Core Modules (fs, path, process)</button>
+            <button class="tag-chip" onclick="filterVivaByCategory('HTTP')">Raw HTTP & Servers</button>
+            <button class="tag-chip" onclick="filterVivaByCategory('Express')">Express & Middleware</button>
+          </div>
+        </div>
+
+        <!-- Viva Accordion Container -->
+        <div class="viva-accordion" id="vivaAccordionContainer">
+          <!-- Populated by JavaScript with 20 high-quality questions -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-container">
+        <div class="footer-left">
+          <strong>NodeForge</strong> — Academic Web Engineering Playground (Week 15–16).
+        </div>
+        <div class="footer-right">
+          Built with Node.js, Express.js, CommonJS & Vanilla Web Standards.
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JavaScript -->
+  <script src="js/app.js"></script>
+</body>
+</html>

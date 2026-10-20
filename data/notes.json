@@ -1,0 +1,23 @@
+[
+  {
+    "id": "note-1",
+    "title": "Understanding the Node.js Event Loop",
+    "content": "Node.js uses a single-threaded event loop with non-blocking I/O to handle thousands of concurrent connections efficiently without thread overhead.",
+    "category": "Architecture",
+    "createdAt": "2026-10-20T10:00:00.000Z"
+  },
+  {
+    "id": "note-2",
+    "title": "CommonJS require() and module.exports",
+    "content": "CommonJS is Node's original module system. require() synchronously loads and evaluates a module, caching the exported module.exports object.",
+    "category": "Modules",
+    "createdAt": "2026-10-20T11:30:00.000Z"
+  },
+  {
+    "id": "note-3",
+    "title": "Express Middleware Pipeline",
+    "content": "Middleware functions have access to (req, res, next). Calling next() passes execution to the next handler; calling next(err) jumps to the error handler.",
+    "category": "Express",
+    "createdAt": "2026-10-20T12:45:00.000Z"
+  }
+]
