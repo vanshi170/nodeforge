@@ -7,9 +7,11 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-// Safe, deterministic file path inside the project
-const DATA_DIR = path.join(__dirname, '..', 'data');
+// Detect Vercel serverless environment (where project root is read-only)
+const isVercel = Boolean(process.env.VERCEL);
+const DATA_DIR = isVercel ? '/tmp' : path.join(__dirname, '..', 'data');
 const NOTES_FILE = path.join(DATA_DIR, 'notes.json');
+const SEED_NOTES_FILE = path.join(__dirname, '..', 'data', 'notes.json');
 
 /**
  * Ensures data directory and notes.json exist
@@ -20,23 +22,29 @@ async function ensureDataFile() {
     try {
       await fs.access(NOTES_FILE);
     } catch {
-      // File does not exist, create initial file
-      const initialNotes = [
-        {
-          id: 'note-1',
-          title: 'Understanding the Node.js Event Loop',
-          content: 'Node.js uses a single-threaded event loop with non-blocking I/O to handle thousands of concurrent connections efficiently.',
-          category: 'Architecture',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'note-2',
-          title: 'CommonJS require() and module.exports',
-          content: 'CommonJS is Node\'s original module format. Modules are evaluated synchronously on first require and cached.',
-          category: 'Modules',
-          createdAt: new Date().toISOString()
-        }
-      ];
+      // File does not exist in target location, populate from seed file or default
+      let initialNotes = null;
+      try {
+        const seedData = await fs.readFile(SEED_NOTES_FILE, 'utf8');
+        initialNotes = JSON.parse(seedData);
+      } catch {
+        initialNotes = [
+          {
+            id: 'note-1',
+            title: 'Understanding the Node.js Event Loop',
+            content: 'Node.js uses a single-threaded event loop with non-blocking I/O to handle thousands of concurrent connections efficiently.',
+            category: 'Architecture',
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'note-2',
+            title: 'CommonJS require() and module.exports',
+            content: 'CommonJS is Node\'s original module format. Modules are evaluated synchronously on first require and cached.',
+            category: 'Modules',
+            createdAt: new Date().toISOString()
+          }
+        ];
+      }
       await fs.writeFile(NOTES_FILE, JSON.stringify(initialNotes, null, 2), 'utf8');
     }
   } catch (err) {
@@ -76,8 +84,10 @@ async function getAllNotes(req, res, next) {
       success: true,
       count: notes.length,
       data: notes,
-      storageMethod: 'fs.promises (asynchronous file I/O)',
-      filePath: 'data/notes.json'
+      storageMethod: isVercel
+        ? 'fs.promises (Vercel /tmp serverless writable storage)'
+        : 'fs.promises (asynchronous file I/O)',
+      filePath: isVercel ? '/tmp/notes.json' : 'data/notes.json'
     });
   } catch (err) {
     next(err);
